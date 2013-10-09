@@ -24,21 +24,64 @@ rails g slim_scroll:install
 
 ```rhtml
 <%= javascript_include_tag "slim_scroll" %>
-
-## Usage
-Slim scroll provide various option to for user 
-
 ```
-Use the `publish_to` helper method to send JavaScript to that channel. This is usually done in a JavaScript AJAX template (such as a create.js.erb file).
+## Usage
+Slim scroll provide various option to for user , here are some condition by which you can user slim scroller
+
+1. Height / Width options
 
 ```rhtml
-<% publish_to "/messages/new" do %>
-  $("#chat").append("<%= j render(@messages) %>");
-<% end %>
+$('#conterner_id').slimscroll({
+  height: '100px',
+  width: '300px'
+});
+
 ```
+2. Scrollbar options
+  I.for scroller size
 
-This JavaScript will be immediately evaluated on all clients who have subscribed to that channel. In this example they will see the new chat message appear in real-time without reloading the browser.
+```rhtml
+$('#conterner_id').slimscroll({
+    size: '15px'
+  });
+  
 
+```
+II. for scroller position 
+
+```rhtml
+$('#conterner_id').slimscroll({
+    position: 'left'
+  });
+  
+
+```
+III. for scroll colore
+```rhtml
+$('#conterner_id').slimscroll({
+    color: '#00f'
+  });
+  
+
+```
+IV. Visiblity option if you want it should be visioble always
+
+```rhtml
+$('#conterner_id').slimscroll({
+   alwaysVisible: true
+  });
+  
+
+```
+V. distance option from certain position 
+
+```rhtml
+$('#conterner_id').slimscroll({
+   alwaysVisible: true
+  });
+  
+
+```
 ## Development & Feedback
 
 Questions or comments? Please use the [issue tracker](https://github.com/ciserfan/slim_scroll/issues). Tests can be run with `bundle` and `rake` commands.

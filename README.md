@@ -27,9 +27,17 @@ rails g slim_scroll:install
 
 ## Usage
 Slim scroll provide various option to for user 
-```rhtml
-<%= subscribe_to "/messages/new" %>
 
+```
+Use the `publish_to` helper method to send JavaScript to that channel. This is usually done in a JavaScript AJAX template (such as a create.js.erb file).
+
+```rhtml
+<% publish_to "/messages/new" do %>
+  $("#chat").append("<%= j render(@messages) %>");
+<% end %>
+```
+
+This JavaScript will be immediately evaluated on all clients who have subscribed to that channel. In this example they will see the new chat message appear in real-time without reloading the browser.
 
 ## Development & Feedback
 

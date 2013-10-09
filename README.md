@@ -37,8 +37,7 @@ $('#conterner_id').slimscroll({
 });
 
 ```
-2. Scrollbar options
-  I.for scroller size
+2.for scroller size
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -47,7 +46,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-II. for scroller position 
+3. for scroller position 
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -56,7 +55,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-III. for scroll colore
+4 . for scroll colore
 ```rhtml
 $('#conterner_id').slimscroll({
     color: '#00f'
@@ -64,7 +63,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-IV. Visiblity option if you want it should be visioble always
+5 . Visiblity option if you want it should be visioble always
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -73,12 +72,52 @@ $('#conterner_id').slimscroll({
   
 
 ```
-V. distance option from certain position 
+6. distance option from certain position 
 
 ```rhtml
 $('#conterner_id').slimscroll({
-   alwaysVisible: true
+    distance: '20px',
+    opacity: 1
   });
+  
+
+```
+
+7.Rail options
+```rhtml
+visiblity
+
+$('#conterner_id').slimscroll({
+    alwaysVisible: true,
+    railVisible: true
+  });
+  
+colore
+
+  $('#conterner_id').slimscroll({
+     railVisible: true,
+     railColor: '#f00'
+  });
+  
+  Opecity 
+  
+    $('#conterner_id').slimscroll({
+     railVisible: true,
+      railOpacity: 0.8
+  });
+  
+  border option
+  
+    $('#conterner_id').slimscroll({
+     railVisible: true,
+    railBorderRadius: 0
+ 
+  });
+  
+  Drag option
+   $('#conterner_id').slimscroll({
+    railDraggable: false
+   });
   
 
 ```

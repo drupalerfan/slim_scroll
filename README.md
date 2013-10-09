@@ -28,7 +28,7 @@ rails g slim_scroll:install
 ## Usage
 Slim scroll provide various option to for user , here are some condition by which you can user slim scroller
 
-1. Height / Width options
+ Height / Width options
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -37,7 +37,7 @@ $('#conterner_id').slimscroll({
 });
 
 ```
-2.for scroller size
+for scroller size
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -46,7 +46,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-3. for scroller position 
+ for scroller position 
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -55,7 +55,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-4 . for scroll colore
+ for scroll colore
 ```rhtml
 $('#conterner_id').slimscroll({
     color: '#00f'
@@ -63,7 +63,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-5 . Visiblity option if you want it should be visioble always
+ Visiblity option if you want it should be visioble always
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -72,7 +72,7 @@ $('#conterner_id').slimscroll({
   
 
 ```
-6. distance option from certain position 
+ distance option from certain position 
 
 ```rhtml
 $('#conterner_id').slimscroll({
@@ -83,7 +83,7 @@ $('#conterner_id').slimscroll({
 
 ```
 
-7.Rail options
+Rail options
 ```rhtml
 visiblity
 
@@ -121,6 +121,83 @@ colore
   
 
 ```
+
+start position
+
+```rhtml
+$('#conterner_id').slimscroll({
+     start: 'bottom'
+  });
+  
+  $('#conterner_id').slimscroll({
+      start: $('.helloDiv')
+  });
+  
+```
+
+ Chaining
+
+```rhtml
+$('#conterner_id').slimscroll({
+     height: '250px'
+}).parent().css({
+  background: '#237FAD',
+  border: '2px dashed #184055'
+  });
+  
+ 
+  
+```
+ Mulitple bindings
+
+```rhtml
+ $('.area').slimscroll({
+    width: '200px'
+  }).parent().css({
+    'float': 'left',
+    'margin-right': '30px'
+  });
+```
+scroll by certain option 
+
+```rhtml
+ $('#testDiv').slimScroll({ scrollBy: '50px' });
+```
+bind any event with scroll 
+
+```rhtml
+$('#testDiv').slimscroll({
+    alwaysVisible: true
+  }).bind('slimscroll', function(e, pos) {
+    $('#testDivOut').append("Reached " + pos + ", ");
+  });
+  
+```
+allowPageScroll option
+
+```rhtml
+$('#testDiv').slimscroll({
+    allowPageScroll: true
+  
+```
+disableFadeOut option
+
+```rhtml
+$('#testDiv2').slimscroll({
+  disableFadeOut: true
+});
+
+```
+
+wheelStep option
+
+```rhtml
+$('#testDiv2').slimscroll({
+ wheelStep: 20
+});
+
+```
+
 ## Development & Feedback
 
 Questions or comments? Please use the [issue tracker](https://github.com/ciserfan/slim_scroll/issues). Tests can be run with `bundle` and `rake` commands.

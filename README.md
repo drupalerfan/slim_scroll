@@ -1,141 +1,155 @@
-# LiveQuery::Rails
+# RailsChat
+Refrence gem: [Private pub](https://github.com/ryanb/private_pub)
 
-Live Query utilizes the power of jQuery selectors by binding events or firing callbacks for matched elements auto-magically, even after the page has been loaded and the DOM updated.
+RailsChat is a Ruby gem for use with Rails to publish and subscribe to messages through [Faye](http://faye.jcoglan.com/). It allows you to easily provide real-time updates through an open socket without tying up a Rails process. All channels are private so users can only listen to events you subscribe them to.
 
-Live Query! For Rails!
+## Setup
 
-This gem provides:
+Add the gem to your Gemfile and run the `bundle` command to install it.
 
-* LiveQuery 1.1.1 - [livequery](https://github.com/brandonaaron/livequery)
+```ruby
+gem "rails_chat"
+```
 
-## Installation
+Run the generator to create the initial files.
 
-Add this line to your application's Gemfile:
+```
+rails g rails_chat:install
+```
 
-For Rails 3.0 apps, add the mozart-rails gem to your Gemfile.
+Next, start up Faye using the rackup file that was generated.
 
-    gem 'livequery-rails'
+```
+rackup rails_chat.ru -s thin -E production
+```
 
-And then execute:
+**In Rails 3.1** add the JavaScript file to your application.js file manifest. 
 
-    $ bundle install
+```javascript
+//= require rails_chat
+```
+The other emoticons js are rendered in the assests via generator. If you are not using the `require_tree .` then please add emoticons JavaScript to your application.js file manifest.
 
-Or install it yourself via:
+```javascript
+//= require emoticons
+//= require emoticons_defination
+```
 
-    $ bundle exec rake build
-    $ gem install --local pkg/livequery-rails-0.0.1.gem
+**In Rails 3.0** add the generated rails_chat.js,emoticons.js,emoticons_defination files to your layout.
 
+```rhtml
+<%= javascript_include_tag "rails_chat","emoticons","emoticons_defination" %>
+```
+
+**In Rails 3.1** add the emoticons StyleSheet file to your application.css file manifest. 
+
+The emoticons css is rendered to your assests via generator. If you are not using the `require_tree .` then please add emoticons StyleSheet to your application.css file manifest.
+
+```stylesheet
+*= require emoticons
+```
+
+**In Rails 3.0** add the generated rails_chat.js file to your layout.
+
+```rhtml
+<%= stylesheet_include_tag "emoticons" %>
+```
+
+
+It's not necessary to include faye.js since that will be handled automatically for you.
+
+## Serving Faye over HTTPS (with Thin)
+
+To server Faye over HTTPS you could create a thin configuration file `config/rails_chat_thin.yml` similar to the following:
+
+```yaml
+---
+port: 4443
+ssl: true
+ssl_key_file: /path/to/server.pem
+ssl_cert_file: /path/to/certificate_chain.pem
+environment: production
+rackup: rails_chat.ru
+```
+
+The `certificate_chain.pem` file should contain your signed certificate, followed by intermediate certificates (if any) and the root certificate of the CA that signed the key.
+
+Next reconfigure the URL in `config/rails_chat.yml` to look like `https://your.hostname.com:4443/faye`
+
+Finally start up Thin from the project root.
+
+```
+thin -C config/rails_chat_thin.yml start
+```
 
 ## Usage
 
-### Rails 3.1 or greater
+Use the `subscribe_to` helper method on any page to subscribe to a channel.
 
-The LiveQuery files and all dependencies will be added to the asset pipeline and be 
-available for you to use. If they're not already in app/assets/javascripts/application.js, 
-add these lines:
+```rhtml
+<%= subscribe_to "/messages/new" %>
+```
 
-    //= require livequery-rails
+Use the `publish_to` helper method to send JavaScript to that channel. This is usually done in a JavaScript AJAX template (such as a create.js.erb file).
 
-LiveQuery has a dependency on the `jQuery-rails` gem.
+```rhtml
+<% publish_to "/messages/new" do %>
+  $("#chat").append("<%= j render(@messages) %>");
+<% end %>
+```
 
-## Examples
+This JavaScript will be immediately evaluated on all clients who have subscribed to that channel. In this example they will see the new chat message appear in real-time without reloading the browser.
 
-For example you could use the following code to bind a click event to all A tags, even any A tags you might add via AJAX.
 
-    $('a') 
-        .livequery('click', function(event) { 
-            alert('clicked'); 
-            return false; 
-        });
+## Alternative Usage
 
-Once you add new A tags to your document, Live Query will bind the click event and there is nothing else that needs to be called or done.
+If you prefer to work through JSON instead of `.js.erb` templates, you can pass a hash to `publish_to` instead of a block and it will be converted `to_json` behind the scenes. This can be done anywhere (such as the controller).
 
-When an element no longer matches a selector the events Live Query bound to it are unbound. The Live Query can be expired which will no longer bind anymore events and unbind all the events it previously bound.
+```ruby
+RailsChat.publish_to "/messages/new", :chat_message => "Hello, world!"
+```
 
-Live Query can even be used with the more powerful jQuery selectors. The following Live Query will match and bind a click event to all A tags that have a rel attribute with the word "friend" in it. If one of the A tags is modified by removing the word "friend" from the rel attribute, the click event will be unbound since it is no longer matched by the Live Query.
+And then handle this through JavaScript on the client side.
 
-    $('a[rel*=friend]') 
-        .livequery('click', function(event) { 
-            doSomething(); 
-        });
+```javascript
+RailsChat.subscribe("/messages/new", function(data, channel) {
+  $("#chat").append($.emoticons.replace(data.chat_message));
+});
+```
 
-Live Query also has the ability to fire a function (callback) when it matches a new element and another function (callback) for when an element is no longer matched. This provides ultimate flexibility and untold use-cases. For example the following code uses a function based Live Query to implement the jQuery hover helper method and remove it when the element is no longer matched.
+The Ruby `subscribe_to` helper call is still necessary with this approach to grant the user access to the channel. The JavaScript is just a callback for any custom behavior.
 
-    $('li') 
-        .livequery(function(){ 
-        // use the helper function hover to bind a mouseover and mouseout event 
-            $(this) 
-                .hover(function() { 
-                    $(this).addClass('hover'); 
-                }, function() { 
-                    $(this).removeClass('hover'); 
-                }); 
-        }, function() { 
-            // unbind the mouseover and mouseout events 
-            $(this) 
-                .unbind('mouseover') 
-                .unbind('mouseout'); 
-        });
+NOTE: To use the emoticons in your chat you have to pass your message like `$.emoticons.replace(data.chat_message)`. This line will convert the emoticons signs into the real emoticons.  
 
-## API
+## Configuration
 
-### `livequery` Signatures
+The configuration is set separately for each environment in the generated `config/rails_chat.yml` file. Here are the options.
 
-The `livequery` method has 3 different signatures or ways to call it.
+* `server`: The URL to use for the Faye server such as `http://localhost:9292/faye`.
+* `secret_token`: A secret hash to secure the server. Can be any string.
+* `signature_expiration`: The length of time in seconds before a subscription signature expires. If this is not set there is no expiration. Note: if Faye is on a separate server from the Rails app, the system clocks must be in sync for the expiration to work properly.
 
-The first, and most typical usage, is to pass an event type and an event handler:
 
-    // eventType: such as click or submit
-    // eventHandler: the function to execute when the event happens
-    $(selector).livequery( eventType, eventHandler );
+## How It Works
 
-The second and third signature is to pass one or two functions to `livequery`. Doing this, `livequery` will call the first passed function when an element is newly matched and will call the second passed function when an element is removed or no longer matched. The second function is optional. The `this` or context of the first function will be the newly matched element. For the second function it will be the element that is no longer matched.
+The `subscribe_to` helper will output the following script which subscribes the user to a specific channel and server.
 
-    // matchedFn: the function to execute when a new element is matched
-    $(selector).livequery( matchedFn );
+```html
+<script type="text/javascript">
+  RailsChat.sign({
+    channel: "/messages/new",
+    timestamp: 1302306682972,
+    signature: "dc1c71d3e959ebb6f49aa6af0c86304a0740088d",
+    server: "http://localhost:9292/faye"
+  });
+</script>
+```
 
-    // matchedFn: the function to execute when a new element is matched
-    // unmatchedFn: the function to execute when an element is no longer matched
-    $(selector).livequery( matchedFn, unmatchFn );
+The signature and timestamp checked on the Faye server to ensure users are only able to access channels you subscribe them to. The signature will automatically expire after the time specified in the configuration.
 
-### `expire` Signatures
+The `publish_to` method will send a post request to the Faye server (using `Net::HTTP`) instructing it to send the given data back to the browser.
 
-The `expire` method has 5 different signatures or ways to call it.
 
-The first way will stop/expire all live queries associated with the selector.
+## Development & Feedback
 
-    $(selector).expire();
-
-The second way will stop/expire all live queries associated with the selector and event type.
-
-    // eventType: such as click or submit
-    $(selctor).expire( eventType );
-
-The third way will stop/expire all live queries associated with the selector, event type, and event handler reference.
-
-    // eventType: such as click or submit
-    // eventHandler: the function to execute when the event happens
-    $(selector).expire( eventType, eventHandler );
-
-The fourth way will stop/expire all live queries associated with the selector and matchedFn.
-
-    // matchedFn: the function to execute when a new element is matched
-    $(selector).expire( matchedFn );
-
-The fifth way will stop/expire all live queries associated with the selector, matchedFn, and unmatchedFn.
-
-    // matchedFn: the function to execute when a new element is matched
-    // unmatchedFn: the function to execute when an element is no longer matched
-    $(selector).expire( matchedFn, unmatchFn );
-
-## For Plugin Developers
-
-If your plugin modifies the DOM without using the built-in DOM Modification methods (append, addClass, etc), you can register your plugin with Live Query like this.
-
-    if (jQuery.livequery) 
-        jQuery.livequery.registerPlugin("pluginMethodName");
-        
-You can register several plugin methods at once by just passing them as additional arguments to the registerPlugin method.
-
-    if (jQuery.livequery) 
-        jQuery.livequery.registerPlugin("method1", "method2", "method3");
+Questions or comments? Please use the [issue tracker](https://github.com/ciserfan/rails_chat/issues). Tests can be run with `bundle` and `rake` commands.
